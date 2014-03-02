@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+var cli = require('../cli'),
+    log = require('../lib/log');
+
+function done(err, msg) {
+    if(err) {
+        if (err instanceof Error) {
+            log.debug(err);
+            log.error(err.message);
+            process.exit(err.errno || 11);
+        } else {
+            log.error(err);
+            process.exit(1);
+        }
+    } else if(msg) {
+        console.log(msg);
+    }
+}
+
+cli(process.argv.slice(2), process.cwd(), done);
