@@ -12,7 +12,7 @@ the first block
 
 This breaks subtitles, specially when casting them to Chromecast.
 
-### CLI Installation
+### Installation
 
 This tool requires `nodejs`, and should installed as globals.
 
@@ -20,20 +20,11 @@ This tool requires `nodejs`, and should installed as globals.
 npm install plex-subtitles-normalizer --global
 ```
 
-## CLI options
-
-### Validate
-
-You can validate SRT files by using this command:
+### How to Use
 
 ```
-$ psn validate --input=path/to/file.srt
+$ cd path/to/Movies
+$ psn
 ```
 
-### Compile
-
-You can parse and generate a valid version of the subtitle SRT file by using this command:
-
-```
-$ psn compile --input=path/to/file.srt --output=path/to/file-plex-ready.srt
-```
+By calling `psn` in a folder, it will automatically recurvisely for any file with `SRT` extension, it will analyze the file looking for invalid formats, if the file has any, it will create a backup of the file (by adding the `.bak` extension), and it will override the original file with the correct version of the SRT format.

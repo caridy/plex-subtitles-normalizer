@@ -1,9 +1,9 @@
 'use strict';
 
 var libfs = require('fs'),
+    glob = require("glob"),
     libpath = require('path'),
     log = require('./lib/log'),
-    getopts = require('./lib/getopts'),
     parser = require('subtitles-parser');
 
 
@@ -31,38 +31,52 @@ function generator(data) {
 }
 
 function main(argv, cwd, cb) {
-    var output, original,
-        env = getopts(argv); // {command:"…", args:{…}, opts:{…}}
+    var output, original, files, i; // {command:"…", args:{…}, opts:{…}}
 
-    if (env.opts.loglevel) {
-        log.level = env.opts.loglevel;
-        log.silly('logging level set to', env.opts.loglevel);
+    log.level = 'info';
+
+    // options is optional
+    files = glob.sync("**/*.srt");
+    if (files.length === 0) {
+        log.info('No SRT files founded within folder: ' + process.cwd);
+        return cb();
     }
-    try {
-        original = readSrtFile(libpath.join(cwd, env.opts.input));
-    } catch (e) {
-        return cb(new Error('Error parsing file ' + env.opts.input + '; ' + (e.stack || e)));
-    }
-    try {
-        output = generator(original);
-    } catch (e) {
-        return cb(new Error('Error generating the output ' + (e.stack || e)));
-    }
-    if (env.command === 'validate') {
-        if (output !== original) {
-            return cb(new Error('Invalid srt format: ' + env.opts.input));
-        } else {
-            return cb(null, 'Valid srt format: ' + env.opts.input);
-        }
-    } else {
+    for (i = 0; i < files.length; i += 1) {
+        log.info('Processing file: ' + files[i]);
         try {
-            output = writeSrtFile(libpath.join(cwd, env.opts.output), output);
+            original = readSrtFile(libpath.join(cwd, files[i]));
         } catch (e) {
-            return cb(new Error('Error writting file ' + env.opts.output + '; ' + (e.stack || e)));
+            log.error('* Parser error: ' + (e.stack || e));
+            continue;
         }
+        try {
+            output = generator(original);
+        } catch (e) {
+            log.error('* Generator error: ' + (e.stack || e));
+            continue;
+        }
+        if (output === original) {
+            log.info('* Valid SRT format, skipping.');
+            continue;
+        }
+        log.info('* Backing up file (*.bak)');
+        try {
+            writeSrtFile(libpath.join(cwd, files[i] + '.bak'), output);
+        } catch (e) {
+            log.error('* Backup error: ' + (e.stack || e));
+            continue;
+        }
+        log.info('* Overwritting file');
+        try {
+            writeSrtFile(libpath.join(cwd, files[i]), output);
+        } catch (e) {
+            log.error('* Write error: ' + (e.stack || e));
+            continue;
+        }
+        log.info('* Done with ' + files[i]);
     }
-    log.info('Writting file ' + env.opts.output);
-    return cb(null, output);
+    log.info('OK');
+    return cb(null);
 }
 
 module.exports = main;
