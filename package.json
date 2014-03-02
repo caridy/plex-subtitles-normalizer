@@ -1,6 +1,6 @@
 {
   "name": "plex-subtitles-normalizer",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "CLI tool to fix subtitles needed by Plex Media Center",
   "bin": {
     "psn": "bin/psn"
@@ -16,6 +16,9 @@
     "parser",
     "cli"
   ],
+  "homepage": "https://github.com/caridy/plex-subtitles-normalizer",
+  "bugs": "https://github.com/caridy/plex-subtitles-normalizer/issues",
+  "repository": { "type": "git", "url": "https://github.com/caridy/plex-subtitles-normalizer" },
   "author": "Caridy Patino <caridy@gmail.com>",
   "license": "MIT",
   "dependencies": {
